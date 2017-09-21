@@ -117,7 +117,13 @@ for (k in 1:nrow(categories)) {
 content %<>% 
   wrap_html_tag("div", params = "class = 'category-list'") %>%
   build_content(
-    wrap_html_tag("Made by <a href = 'http://schiff.co.nz'>Aaron Schiff</a> using data from <a href = 'http://www.stats.govt.nz/browse_for_stats/economic_indicators/prices_indexes/food-price-index-info-releases.aspx'>Statistics New Zealand</a>", "p")
+    wrap_html_tag("Made by <a href = 'http://schiff.co.nz'>Aaron Schiff</a> using data from <a href = 'http://www.stats.govt.nz/browse_for_stats/economic_indicators/prices_indexes/food-price-index-info-releases.aspx'>Statistics New Zealand</a>.", "p")
+  ) %>%
+  build_content(
+    wrap_html_tag(paste0("Prices are averages across many retailers and geographic locations. ", 
+                        "Prices have not been adjusted for inflation. ", 
+                        "The most recent data is for <b>", month.name[month(max(prices$date))], " ", year(max(prices$date)), "</b>."), 
+                  "p")
   )
 
 output_html(content, "index.html")
