@@ -1,0 +1,49 @@
+body {
+    font-family: Helvetica, Arial, Sans-Serif;
+	text-rendering: optimizeLegibility;
+
+	-webkit-font-variant-ligatures: common-ligatures;
+	font-variant-ligatures: common-ligatures;
+
+    background-color: white;
+}
+
+div#wrapper {
+  margin: 0 1rem 2rem 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1rem;
+  font-style: italic;
+  margin-top: 0;
+}
+
+.category-button { 
+  width: 250px;
+  text-align: left;
+}
+
+.back-button {
+  font-weight: bold;
+}
+
+.chart {
+  margin-top: 2rem;
+}
+
+.price-chart {
+  width: 800px;
+}
+
+.previous-price {
+  font-size: 1.5rem;
+}
+
+.align-right {
+  text-align: right;
+}

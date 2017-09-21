@@ -1,0 +1,9 @@
+category,category_id,category_order
+Fruit,C1,1
+Vegetables,C2,2
+Meat & Seafood,C3,3
+Bread,C4,4
+Dairy products,C5,5
+Drinks,C6,6
+Canned food,C7,7
+Other,C8,8
