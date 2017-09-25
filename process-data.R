@@ -307,4 +307,7 @@ for (f in 1:nrow(valid_food)) {
 file.copy(from = paste0(template_dir, "style.css"), 
           to = paste0(html_dir, "style.css"), 
           overwrite = TRUE)
+file.copy(from = paste0(template_dir, "apple-touch-icon.png"), 
+          to = paste0(html_dir, "apple-touch-icon.png"), 
+          overwrite = TRUE)
 # -----------------------------------------------------------------------------
