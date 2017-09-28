@@ -26,6 +26,7 @@ h2 {
 .category-button { 
   width: 250px;
   text-align: left;
+  border-radius: 4px;
 }
 
 .back-button {
@@ -46,4 +47,44 @@ h2 {
 
 .align-right {
   text-align: right;
+}
+
+.C1 { 
+  background: #ff9800;
+  color: white;
+}
+
+.C2 {
+  background: #4caf50;
+  color: white;
+}
+
+.C3 {
+  background: #ef5350;
+  color: white;
+}
+
+.C4 { 
+  background: #a1887f;
+  color: white;
+}
+
+.C5 {
+  background: #fbc02d;
+  color: white;
+}
+
+.C6 {
+  background: #2196f3;
+  color: white;
+}
+
+.C7 {
+  background: #607d8b;
+  color: white;
+}
+
+.C8 {
+  background: #9e9e9e;
+  color: white;
 }

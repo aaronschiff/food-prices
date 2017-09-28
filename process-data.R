@@ -19,7 +19,7 @@ img_dir <- "img/"
 
 # Styles
 chart_width <- 1600
-chart_height <- 600
+chart_height <- 500
 
 # Other stuff
 current_date <- Sys.Date()
@@ -110,7 +110,9 @@ for (k in 1:nrow(categories)) {
                   params = c(paste0("href = '", 
                                     categories[k, "category_id"], 
                                     ".html'"), 
-                             "class = 'pure-button category-button'")) %>%
+                             paste0("class = 'pure-button category-button ", 
+                                    categories[k, "category_id"], 
+                                    "'"))) %>%
       wrap_html_tag("p")
   )
 }
@@ -121,8 +123,8 @@ content %<>%
   ) %>%
   build_content(
     wrap_html_tag(paste0("Prices are averages across many retailers and geographic locations. ", 
-                        "Prices have not been adjusted for inflation. ", 
-                        "The most recent data is for <b>", month.name[month(max(prices$date))], " ", year(max(prices$date)), "</b>."), 
+                         "Prices have not been adjusted for inflation. ", 
+                         "The most recent data is for <b>", month.name[month(max(prices$date))], " ", year(max(prices$date)), "</b>."), 
                   "p")
   )
 
@@ -147,7 +149,9 @@ for (k in 1:nrow(categories)) {
                     params = c(paste0("href = '", 
                                       items[i, "food_id"], 
                                       ".html'"), 
-                               "class = 'pure-button category-button'")) %>%
+                               paste0("class = 'pure-button category-button ", 
+                                      categories[k, "category_id"], 
+                                      "'"))) %>%
         wrap_html_tag("p")
     )
   }
@@ -190,10 +194,11 @@ for (f in 1:nrow(valid_food)) {
                  labels = date_format("%Y")) +
     scale_y_continuous(limits = c(0, NA), 
                        labels = scales::dollar) + 
-    clean_theme(base_size = 45, 
+    clean_theme(base_size = 46, 
                 axis.ticks.x = element_blank(), 
-                panel.grid.major.x = element_line(colour = "#e8e8e8"), 
-                plot.margin = unit(c(2, 2, 2, 2), "lines"))
+                panel.grid.major.x = element_line(colour = "#cccccc"),
+                panel.grid.major.y = element_line(colour = "#cccccc"),
+                plot.margin = unit(c(1, 3, 0, 1), "lines"))
   png(paste0(html_dir, img_dir, valid_food[f, "food_id"], ".png"), width = chart_width, height = chart_height)
   print(item_chart)
   dev.off()
@@ -285,7 +290,9 @@ for (f in 1:nrow(valid_food)) {
       wrap_html_tag(paste0("&lsaquo; ", valid_food[f, "category"]), 
                     "a", 
                     params = c(paste0("href = '", valid_food[f, "category_id"], ".html'", 
-                                      "class = 'pure-button category-button back-button'"))) %>%
+                                      paste0("class = 'pure-button category-button back-button ", 
+                                             valid_food[f, "category_id"], 
+                                             "'")))) %>%
         wrap_html_tag("p")
     ) %>%
     build_content(
