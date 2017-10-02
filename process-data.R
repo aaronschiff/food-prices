@@ -65,16 +65,16 @@ prices %<>% left_join(food_categories, by = "food") %>%
   filter(!is.na(category)) %>%
   arrange(category_id, food_id, date) %>%
   left_join(month_names, by = c("month" = "month_number"))
-
-# Load HTML template parts
-template_header <- read_file(paste0(template_dir, "header.html"))
-template_footer <- read_file(paste0(template_dir, "footer.html"))
 # -----------------------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
 # HTML output helper functions
 output_html <- function(content, output_filename) {
+  # Load HTML template parts
+  template_header <- read_file(paste0(template_dir, "header.html"))
+  template_footer <- read_file(paste0(template_dir, "footer.html"))
+  
   output <- paste(template_header, content, template_footer, sep = "\n")
   write_file(output, paste0(html_dir, output_filename))
 }
