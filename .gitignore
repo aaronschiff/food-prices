@@ -2,6 +2,7 @@
 .Rhistory
 .Rproj*
 html/*
+html-backup/*
 Prototype.xlsx
 
 food-prices.Rproj

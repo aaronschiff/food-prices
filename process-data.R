@@ -185,9 +185,48 @@ for (f in 1:nrow(valid_food)) {
     arrange(date)
   item_prices_12_months <- tail(item_prices, 12)
   
+  # Create ts object of prices, loess trend, and detrended values
+  item_prices_ts <- ts(item_prices$price, 
+                       start = c(year(min(item_prices$date)), month(min(item_prices$date))), 
+                       end = c(year(max(item_prices$date)), month(max(item_prices$date))), 
+                       frequency = 12)
+  item_prices_ts <- na.omit(item_prices_ts)   # Remove any NA values at beginning/end of series
+  # NB this will fail if any NA inside the series (shouldn't be)
+  item_prices_trend <- loess(item_prices_ts ~ time(item_prices_ts), 
+                             span = 3/12)
+  item_prices_trend_ts <- ts(predict(item_prices_trend), 
+                             start = start(na.omit(item_prices_ts)), 
+                             end = end(na.omit(item_prices_ts)), 
+                             frequency = frequency(item_prices_ts))
+  item_prices_detrended <- item_prices_ts - item_prices_trend_ts
+  
+  # Set up extra plotting data
+  plot_dat <- tibble(price_trend = as.numeric(item_prices_trend_ts), 
+                     price_detrended = as.numeric(item_prices_detrended), 
+                     date = seq(from = ymd(paste(start(item_prices_trend_ts)[1], 
+                                                 start(item_prices_trend_ts)[2], 
+                                                 "1", 
+                                                 sep = "-")), 
+                                to = ymd(paste(end(item_prices_trend_ts)[1], 
+                                               end(item_prices_trend_ts)[2], 
+                                               "1", 
+                                               sep = "-")), 
+                                by = "1 month")) %>%
+    mutate(date_factor = factor(month(date), 
+                                levels = 1:12, 
+                                labels = c("Jan", "Feb", "Mar", "Apr", 
+                                           "May", "Jun", "Jul", "Aug", 
+                                           "Sep", "Oct", "Nov", "Dec")))
+  
   # Create price chart
   item_chart <- ggplot(item_prices) + 
-    geom_line(aes(x = date, y = price), size = 2) + 
+    geom_line(aes(x = date, y = price), 
+              size = 2, 
+              col = rgb(200/255, 200/255, 200/255)) + 
+    geom_line(aes(x = date, y = price_trend), 
+              size = 2, 
+              col = "black", 
+              data = plot_dat) + 
     xlab("") + 
     ylab("") + 
     scale_x_date(breaks = date_breaks("1 years"), 
@@ -203,6 +242,32 @@ for (f in 1:nrow(valid_food)) {
   print(item_chart)
   dev.off()
   
+  # Create monthly price deviation chart
+  seasonality_chart <- ggplot(plot_dat) + 
+    geom_hline(yintercept = 0, colour = "black", size = 2) + 
+    geom_point(aes(x = date_factor, y = price_detrended), 
+               colour = rgb(0, 0, 0, 0.2), 
+               size = 5, 
+               shape = 16) + 
+    geom_point(aes(x = date_factor, y = mean_price_detrended),
+               colour = rgb(120/255, 120/255, 120/255), 
+               size = 35, 
+               shape = "-", 
+               data = plot_dat %>%
+                 group_by(date_factor) %>%
+                 summarise(mean_price_detrended = mean(price_detrended, na.rm = TRUE))) +
+    xlab("") + 
+    ylab("") + 
+    scale_y_continuous(labels = scales::dollar) + 
+    clean_theme(base_size = 46, 
+                axis.ticks.x = element_blank(), 
+                panel.grid.major.x = element_blank(),
+                panel.grid.major.y = element_line(colour = "#cccccc"),
+                plot.margin = unit(c(1, 3, 0, 1), "lines"))
+  png(paste0(html_dir, img_dir, valid_food[f, "food_id"], "-seas.png"), width = chart_width, height = chart_height)
+  print(seasonality_chart)
+  dev.off()
+  
   # Title and subtitle
   content <- wrap_html_tag(valid_food[f, "short_name"], "h1") %>%
     build_content(
@@ -213,7 +278,7 @@ for (f in 1:nrow(valid_food)) {
         wrap_html_tag("h2")
     )
   
-  # Price in same month last year
+  # Price in same month last year and range over the past year
   content %<>%
     build_content(
       wrap_html_tag(
@@ -223,66 +288,88 @@ for (f in 1:nrow(valid_food)) {
                          filter(year == year(current_date) - 1, 
                                 month == month(current_date)) %>%
                          pull(price)), 
-               "</b> last ", current_month_name), 
+               "</b> last ", current_month_name, 
+               " and between ", 
+               sprintf("$%0.2f", min(item_prices_12_months$price, na.rm = TRUE)), 
+               " and ", 
+               sprintf("$%0.2f", max(item_prices_12_months$price, na.rm = TRUE)), 
+               " in the past 12 months."), 
         "p", 
         params = "class = 'previous-price'"
       )
     ) 
   
-  # Price variability table
+  # # Price variability table
+  # content %<>%
+  #   build_content(
+  #     paste(wrap_html_tag("", "th"), 
+  #           wrap_html_tag("Lowest", 
+  #                         "th", 
+  #                         params = "class = 'align-right'"), 
+  #           wrap_html_tag("Highest", 
+  #                         "th", 
+  #                         params = "class = 'align-right'")) %>%
+  #       wrap_html_tag("tr") %>%
+  #       wrap_html_tag("thead") %>%
+  #       build_content(
+  #         paste(wrap_html_tag(current_month_name, "td"), 
+  #               wrap_html_tag(sprintf("$%0.2f", 
+  #                                     item_prices %>%
+  #                                       filter(month == month(current_date)) %>%
+  #                                       summarise(min_price = min(price, na.rm = TRUE)) %>%
+  #                                       pull(min_price)), 
+  #                             "td", 
+  #                             params = "class = 'align-right'"), 
+  #               wrap_html_tag(sprintf("$%0.2f", 
+  #                                     item_prices %>%
+  #                                       filter(month == month(current_date)) %>%
+  #                                       summarise(max_price = max(price, na.rm = TRUE)) %>%
+  #                                       pull(max_price)), 
+  #                             "td", 
+  #                             params = "class = 'align-right'")) %>%
+  #           wrap_html_tag("tr") %>%
+  #           build_content(
+  #             paste(wrap_html_tag("Past 12 months", "td"), 
+  #                   wrap_html_tag(sprintf("$%0.2f", min(item_prices_12_months$price, na.rm = TRUE)), 
+  #                                 "td", 
+  #                                 params = "class = 'align-right'"), 
+  #                   wrap_html_tag(sprintf("$%0.2f", max(item_prices_12_months$price, na.rm = TRUE)), 
+  #                                 "td", 
+  #                                 params = "class = 'align-right'")) %>%
+  #               wrap_html_tag("tr")
+  #           ) %>%
+  #           wrap_html_tag("tbody")
+  #       ) %>%
+  #       wrap_html_tag("table", 
+  #                     params = "class = 'pure-table pure-table-horizontal'")
+  #   )
+  
+  # Price charts
   content %<>%
     build_content(
-      paste(wrap_html_tag("", "th"), 
-            wrap_html_tag("Lowest", 
-                          "th", 
-                          params = "class = 'align-right'"), 
-            wrap_html_tag("Highest", 
-                          "th", 
-                          params = "class = 'align-right'")) %>%
-        wrap_html_tag("tr") %>%
-        wrap_html_tag("thead") %>%
-        build_content(
-          paste(wrap_html_tag(current_month_name, "td"), 
-                wrap_html_tag(sprintf("$%0.2f", 
-                                      item_prices %>%
-                                        filter(month == month(current_date)) %>%
-                                        summarise(min_price = min(price, na.rm = TRUE)) %>%
-                                        pull(min_price)), 
-                              "td", 
-                              params = "class = 'align-right'"), 
-                wrap_html_tag(sprintf("$%0.2f", 
-                                      item_prices %>%
-                                        filter(month == month(current_date)) %>%
-                                        summarise(max_price = max(price, na.rm = TRUE)) %>%
-                                        pull(max_price)), 
-                              "td", 
-                              params = "class = 'align-right'")) %>%
-            wrap_html_tag("tr") %>%
-            build_content(
-              paste(wrap_html_tag("Past 12 months", "td"), 
-                    wrap_html_tag(sprintf("$%0.2f", min(item_prices_12_months$price, na.rm = TRUE)), 
-                                  "td", 
-                                  params = "class = 'align-right'"), 
-                    wrap_html_tag(sprintf("$%0.2f", max(item_prices_12_months$price, na.rm = TRUE)), 
-                                  "td", 
-                                  params = "class = 'align-right'")) %>%
-                wrap_html_tag("tr")
-            ) %>%
-            wrap_html_tag("tbody")
-        ) %>%
-        wrap_html_tag("table", 
-                      params = "class = 'pure-table pure-table-horizontal'")
-    )
-  
-  # Price chart
-  content %<>%
+      wrap_html_tag("<b>Price trend</b>", 
+                    "p", 
+                    params = "class = 'chart-title'")
+    ) %>%
     build_content(
       wrap_html_tag(
         paste0("<img class = 'pure-img price-chart' src = '", img_dir, valid_food[f, "food_id"], ".png' />"), 
         "div", 
         params = "class = 'chart'"
       )
-    ) 
+    ) %>%
+    build_content(
+      wrap_html_tag("<b>Monthly variation around the trend</b>", 
+                    "p", 
+                    params = "class = 'chart-title'")
+    ) %>%
+    build_content(
+      wrap_html_tag(
+        paste0("<img class = 'pure-img price-chart' src = '", img_dir, valid_food[f, "food_id"], "-seas.png' />"), 
+        "div", 
+        params = "class = 'chart'"
+      )
+    )
   
   # Back buttons
   content %<>% 
