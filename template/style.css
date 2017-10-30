@@ -8,7 +8,7 @@ body {
     background-color: white;
 }
 
-div#wrapper {
+#wrapper {
   margin: 0 1rem 2rem 1rem;
 }
 
@@ -34,7 +34,7 @@ h2 {
 }
 
 .chart {
-  margin-top: 2rem;
+  margin-top: 0.5rem;
 }
 
 .price-chart {

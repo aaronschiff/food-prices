@@ -35,7 +35,7 @@ month_names <- tibble(
 # Load data and cleaning
 
 # Food price index 
-prices <- read_csv(paste0(data_dir, "CPI324701_20170918_033059_56.csv"), skip = 1) %>%
+prices <- read_csv(paste0(data_dir, "CPI324701_20171025_074401_42.csv"), skip = 1) %>%
   rename(original_date = X1) %>%
   mutate_at(vars(-original_date), as.numeric)
 prices_table_junk_row <- which(prices$original_date == "Table information:")
@@ -218,13 +218,13 @@ for (f in 1:nrow(valid_food)) {
                                            "May", "Jun", "Jul", "Aug", 
                                            "Sep", "Oct", "Nov", "Dec")))
   
-  # Create price chart
+  # Create price trend chart
   item_chart <- ggplot(item_prices) + 
     geom_line(aes(x = date, y = price), 
-              size = 2, 
+              size = 3, 
               col = rgb(200/255, 200/255, 200/255)) + 
     geom_line(aes(x = date, y = price_trend), 
-              size = 2, 
+              size = 3, 
               col = "black", 
               data = plot_dat) + 
     xlab("") + 
@@ -235,8 +235,10 @@ for (f in 1:nrow(valid_food)) {
                        labels = scales::dollar) + 
     clean_theme(base_size = 46, 
                 axis.ticks.x = element_blank(), 
-                panel.grid.major.x = element_line(colour = "#cccccc"),
-                panel.grid.major.y = element_line(colour = "#cccccc"),
+                axis.text = element_text(face = "bold", 
+                                         size = rel(1.1)), 
+                panel.grid.major.x = element_line(colour = "#bbbbbb"),
+                panel.grid.major.y = element_line(colour = "#bbbbbb"),
                 plot.margin = unit(c(1, 3, 0, 1), "lines"))
   png(paste0(html_dir, img_dir, valid_food[f, "food_id"], ".png"), width = chart_width, height = chart_height)
   print(item_chart)
@@ -246,12 +248,12 @@ for (f in 1:nrow(valid_food)) {
   seasonality_chart <- ggplot(plot_dat) + 
     geom_hline(yintercept = 0, colour = "black", size = 2) + 
     geom_point(aes(x = date_factor, y = price_detrended), 
-               colour = rgb(0, 0, 0, 0.2), 
-               size = 5, 
+               colour = rgb(0, 0, 0, 0.3), 
+               size = 8, 
                shape = 16) + 
     geom_point(aes(x = date_factor, y = mean_price_detrended),
-               colour = rgb(120/255, 120/255, 120/255), 
-               size = 35, 
+               colour = rgb(40/255, 40/255, 40/255), 
+               size = 56, 
                shape = "-", 
                data = plot_dat %>%
                  group_by(date_factor) %>%
@@ -261,8 +263,10 @@ for (f in 1:nrow(valid_food)) {
     scale_y_continuous(labels = scales::dollar) + 
     clean_theme(base_size = 46, 
                 axis.ticks.x = element_blank(), 
+                axis.text = element_text(face = "bold", 
+                                         size = rel(1.1)), 
                 panel.grid.major.x = element_blank(),
-                panel.grid.major.y = element_line(colour = "#cccccc"),
+                panel.grid.major.y = element_line(colour = "#bbbbbb"),
                 plot.margin = unit(c(1, 3, 0, 1), "lines"))
   png(paste0(html_dir, img_dir, valid_food[f, "food_id"], "-seas.png"), width = chart_width, height = chart_height)
   print(seasonality_chart)
@@ -288,8 +292,13 @@ for (f in 1:nrow(valid_food)) {
                          filter(year == year(current_date) - 1, 
                                 month == month(current_date)) %>%
                          pull(price)), 
-               "</b> last ", current_month_name, 
-               " and between ", 
+               "</b> last ", current_month_name), 
+        "p", 
+        params = "class = 'previous-price'")
+    ) %>%
+    build_content(
+      wrap_html_tag(
+        paste0("Between ", 
                sprintf("$%0.2f", min(item_prices_12_months$price, na.rm = TRUE)), 
                " and ", 
                sprintf("$%0.2f", max(item_prices_12_months$price, na.rm = TRUE)), 
@@ -297,7 +306,7 @@ for (f in 1:nrow(valid_food)) {
         "p", 
         params = "class = 'previous-price'"
       )
-    ) 
+    )
   
   # # Price variability table
   # content %<>%
