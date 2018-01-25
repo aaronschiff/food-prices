@@ -35,7 +35,7 @@ month_names <- tibble(
 # Load data and cleaning
 
 # Food price index 
-prices <- read_csv(paste0(data_dir, "CPI324701_20171218_020807_58.csv"), skip = 1) %>%
+prices <- read_csv(paste0(data_dir, "CPI324701_20180125_105035_9.csv"), skip = 1) %>%
   rename(original_date = X1) %>%
   mutate_at(vars(-original_date), as.numeric)
 prices_table_junk_row <- which(prices$original_date == "Table information:")
