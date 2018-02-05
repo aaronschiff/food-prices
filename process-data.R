@@ -66,7 +66,7 @@ item_weights <- read_csv(paste0(data_dir, "item-weights.csv"))
 # Data joins and filtering
 food_categories %<>% left_join(categories, by = "category") %>%
   left_join(item_weights, by = "food") %>%
-  mutate(units = ifelse(!is.na(weight), "per unit", units))
+  mutate(units = ifelse(!is.na(weight), "per unit (estimated from price per kg)", units))
 prices %<>% left_join(food_categories, by = "food") %>%
   filter(!is.na(category)) %>%
   arrange(category_id, food_id, date) %>%
