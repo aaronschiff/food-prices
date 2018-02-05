@@ -1,4 +1,5 @@
 # Process food prices data for app
+# This version includes conversion from price per kg to price per unit for some items
 
 # -----------------------------------------------------------------------------
 # Setup

@@ -1,4 +1,3 @@
-
 .Rhistory
 .Rproj*
 html/*
@@ -6,9 +5,7 @@ html-backup/*
 html-backup-2/*
 html-current/*
 Prototype.xlsx
-
 food-prices.Rproj
 .Rproj.user
-.DS_Store
 .DS_Store
 .DS_Store
