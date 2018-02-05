@@ -74,7 +74,7 @@ prices %<>% left_join(food_categories, by = "food") %>%
 
 # Unit price conversion for selected items
 prices %<>% mutate(price = ifelse(!is.na(weight), 
-                                  round(price / (weight / 1000), digits = 2), 
+                                  round(price * (weight / 1000), digits = 2), 
                                   price))
 # -----------------------------------------------------------------------------
 
