@@ -60,12 +60,22 @@ food_categories <- read_csv(paste0(data_dir, "food-categories.csv")) %>%
   arrange(food) %>%
   mutate(food_id = paste0("F", 1:nrow(.)))
 
+# Item weights
+item_weights <- read_csv(paste0(data_dir, "item-weights.csv"))
+
 # Data joins and filtering
-food_categories %<>% left_join(categories, by = "category")
+food_categories %<>% left_join(categories, by = "category") %>%
+  left_join(item_weights, by = "food") %>%
+  mutate(units = ifelse(!is.na(weight), "per unit", units))
 prices %<>% left_join(food_categories, by = "food") %>%
   filter(!is.na(category)) %>%
   arrange(category_id, food_id, date) %>%
   left_join(month_names, by = c("month" = "month_number"))
+
+# Unit price conversion for selected items
+prices %<>% mutate(price = ifelse(!is.na(weight), 
+                                  round(price / (weight / 1000), digits = 2), 
+                                  price))
 # -----------------------------------------------------------------------------
 
 
