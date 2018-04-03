@@ -36,7 +36,7 @@ month_names <- tibble(
 # Load data and cleaning
 
 # Food price index 
-prices <- read_csv(paste0(data_dir, "CPI324701_20180125_105035_9.csv"), skip = 1) %>%
+prices <- read_csv(paste0(data_dir, "CPI324701_20180404_111551_5.csv"), skip = 1) %>%
   rename(original_date = X1) %>%
   mutate_at(vars(-original_date), as.numeric)
 prices_table_junk_row <- which(prices$original_date == "Table information:")
@@ -240,7 +240,7 @@ for (f in 1:nrow(valid_food)) {
               data = plot_dat) + 
     xlab("") + 
     ylab("") + 
-    scale_x_date(breaks = date_breaks("1 years"), 
+    scale_x_date(breaks = date_breaks("2 years"), 
                  labels = date_format("%Y")) +
     scale_y_continuous(limits = c(0, NA), 
                        labels = scales::dollar) + 
@@ -249,6 +249,7 @@ for (f in 1:nrow(valid_food)) {
                 axis.text = element_text(face = "bold", 
                                          size = rel(1.1)), 
                 panel.grid.major.x = element_line(colour = "#bbbbbb"),
+                panel.grid.minor.x = element_line(colour = "#bbbbbb"),
                 panel.grid.major.y = element_line(colour = "#bbbbbb"),
                 plot.margin = unit(c(1, 3, 0, 1), "lines"))
   png(paste0(html_dir, img_dir, valid_food[f, "food_id"], ".png"), width = chart_width, height = chart_height)
